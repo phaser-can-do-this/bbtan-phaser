@@ -1,5 +1,7 @@
 import Brick from './objects/Brick'
-import Ball from './objects/Ball'
+
+import Shooter from './Shooter'
+
 
 class GameState extends Phaser.State {
 
@@ -21,15 +23,16 @@ class GameState extends Phaser.State {
   create() {
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
-    this.initBackground();
+    this.initGameBoard();
+
+    this.nextShootingPoint = new Phaser.Point(this.world.centerX, this.boardBottom)
+
+    this.shooter = new Shooter(this, this.nextShootingPoint.x, this.nextShootingPoint.y)
+    this.world.add(this.shooter)
 
     this.bricks = this.add.group()
-    // this.bricks.enableBody = true
-    // this.bricks.physicsBodyType = Phaser.Physics.ARCADE
-
     for (let i = 0; i < 50; i++) {
       let brick = new Brick(this, 0, 0, 1, 0xff0000)
-      // this.world.add(brick)
       this.physics.arcade.enable(brick)
 
       brick.body.immovable = true
@@ -42,62 +45,87 @@ class GameState extends Phaser.State {
     var xOffset = 5
     for (let row = 1; row < rowMax; row++) {
       for (let i = 0; i < colMax; i++) {
-
         let brick = this.bricks.getFirstDead()
-
         brick.reset(xOffset + i * gridSize, 86 + row * gridSize,
           10, 0xff0000);
-        brick.revive()
       }
     }
-
-    this.ball = new Ball(this, 100, 100)
-    this.world.add(this.ball)
-
-    this.input.onDown.add(()=> {
-      this.physics.arcade.moveToPointer(this.ball, 800)
+    
+    this.input.onDown.add((to)=> {
+      this.shoot(to);
+      this.moveBrickBy(gridSize);
     })
-
-    this.physics.arcade.enable([this.ball,
-      this.topLine,
-      this.bottomLine])
-
-    this.ball.body.collideWorldBounds = true;
-    this.ball.body.bounce.set(1);
-    this.topLine.body.immovable = true
-    this.bottomLine.body.immovable = true
-
   }
+
+  moveBrickBy(step) {
+    var newY = this.bricks.y + step
+    var t = this.add.tween(this.bricks).to({
+      y: newY
+    }, 500)
+    t.start()
+    return t
+  }
+
+  shoot(to) {
+    var from = this.nextShootingPoint.clone()
+    this.shooter.shoot(from, to)
+    this.nextShootingPoint = null
+  }
+
+  onBallHitBottom(bottomLine, ball) {
+    ball.body.velocity.setTo(0, 0)
+
+    if (!this.nextShootingPoint) {
+      var p = ball.position.clone()
+      p.y = this.boardBottom
+      this.nextShootingPoint = p
+      this.shooter.position.setTo(p.x, p.y)
+      ball.kill()
+    } else {
+      var tween = this.add.tween(ball)
+        .to({
+            x: this.shooter.x,
+            y: this.shooter.y
+          },
+          100);
+      tween.onComplete.add(function () {
+        ball.kill()
+      })
+      tween.start()
+    }
+
+  };
 
   update() {
-    this.physics.arcade.collide(this.ball, this.bricks, (ball, brick)=> {
+    this.physics.arcade.collide(this.shooter.balls, this.bricks, (ball, brick)=> {
       brick.onHit()
     });
-
-    this.physics.arcade.collide(this.topLine, this.ball)
-    this.physics.arcade.collide(this.bottomLine, this.ball, (line, ball)=> {
-      ball.body.velocity.setTo(0, 0)
-    })
-
+    this.physics.arcade.collide(this.topLine, this.shooter.balls)
+    this.physics.arcade.collide(this.bottomLine, this.shooter.balls, this.onBallHitBottom, null, this)
   }
 
-
-  initBackground() {
+  initGameBoard() {
     var heads = this.add.image(this.world.centerX, 0, 'heads')
     heads.anchor.set(0.5, 0)
-    this.topLine = this.add.sprite(0, heads.height + 1, 'line')
-
     var frame = this.add.image(this.world.centerX, this.world.height, 'frame')
     frame.anchor.set(0.5, 1)
     var feet = this.add.image(this.world.centerX, this.world.height - frame.height, 'feet')
     feet.anchor.set(0.5, 1)
+
+    this.topLine = this.add.sprite(0, heads.height + 1, 'line')
     this.bottomLine = this.add.sprite(0, this.world.height - frame.height - feet.height, 'line')
+
+    this.physics.arcade.enable([this.topLine, this.bottomLine])
+    this.topLine.body.immovable = true
+    this.bottomLine.body.immovable = true
+
+    this.boardBottom = this.bottomLine.position.y - 16
   }
 
   render() {
     // this.game.debug.inputInfo(50, 400);
     // this.game.debug.spriteInfo(this.ball,50,50)
-    this.game.debug.body(this.topLine)
+    // this.game.debug.body(this.topLine)
   }
 
 }

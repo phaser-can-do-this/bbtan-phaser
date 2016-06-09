@@ -35,7 +35,7 @@ class Brick extends Phaser.Sprite {
       this.hpText.setText(this.hp.toString())
     }
   }
-  
+
 }
 
 export default Brick
