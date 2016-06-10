@@ -123,10 +123,14 @@ class GameState extends Phaser.State {
       })
       this.addBricks(12)
       this.moveBrickBy(70)
-      isGameOver?alert('Game Over'):''
+      isGameOver?this.restartGame():''
     }
 
   };
+
+  restartGame(){
+    this.state.restart(true,false)
+  }
 
   update() {
     this.physics.arcade.collide(this.shooter.balls, this.bricks, (ball, brick)=> {
