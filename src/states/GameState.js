@@ -58,22 +58,20 @@ class GameState extends Phaser.State {
   }
 
   addBricks(hp) {
-    var gridSize = 70;
-    var rowMax = 1, colMax = 7;
+    var gridSize = 70
+    var colMax = 7;
     var xOffset = 5
-    for (let row = 0; row < rowMax; row++) {
-      for (let i = 0; i < colMax; i++) {
-        let brick = this.bricks.getFirstDead()
-        brick.reset(xOffset + i * gridSize, 86 + row * gridSize,
-          hp, 0xff0000);
-      }
+    var row = 0
+    for (let i = 0; i < colMax; i++) {
+      let brick = this.bricks.getFirstDead()
+      brick.reset(xOffset + i * gridSize,
+        86 + row * gridSize,
+        hp, 0xff0000);
     }
-
   }
 
-
   moveBrickBy(step) {
-    this.bricks.forEachAlive( (brick)=>{
+    this.bricks.forEachAlive((brick)=> {
       var newY = brick.y + step
       var t = this.add.tween(brick).to({
         y: newY
@@ -117,8 +115,15 @@ class GameState extends Phaser.State {
     }
 
     if (this.haveNBalls === this.needNBalls) {
+      var isGameOver = false
+      this.bricks.forEachAlive((brick)=> {
+        if (brick.y>=504){
+          isGameOver =true
+        }
+      })
       this.addBricks(12)
       this.moveBrickBy(70)
+      isGameOver?alert('Game Over'):''
     }
 
   };
