@@ -21,8 +21,9 @@ class GameState extends Phaser.State {
   }
 
   create() {
-    this.physics.startSystem(Phaser.Physics.ARCADE);
 
+    this.haveNBalls = this.needNBalls = 0
+    this.physics.startSystem(Phaser.Physics.ARCADE);
     this.initGameBoard();
 
     this.nextShootingPoint = new Phaser.Point(this.world.centerX, this.boardBottom)
@@ -50,30 +51,51 @@ class GameState extends Phaser.State {
           10, 0xff0000);
       }
     }
-    
+
     this.input.onDown.add((to)=> {
-      this.shoot(to);
-      this.moveBrickBy(gridSize);
+      this.startToShoot(to);
     })
   }
 
-  moveBrickBy(step) {
-    var newY = this.bricks.y + step
-    var t = this.add.tween(this.bricks).to({
-      y: newY
-    }, 500)
-    t.start()
-    return t
+  addBricks(hp) {
+    var gridSize = 70;
+    var rowMax = 1, colMax = 7;
+    var xOffset = 5
+    for (let row = 0; row < rowMax; row++) {
+      for (let i = 0; i < colMax; i++) {
+        let brick = this.bricks.getFirstDead()
+        brick.reset(xOffset + i * gridSize, 86 + row * gridSize,
+          hp, 0xff0000);
+      }
+    }
+
   }
 
-  shoot(to) {
-    var from = this.nextShootingPoint.clone()
-    this.shooter.shoot(from, to)
-    this.nextShootingPoint = null
+
+  moveBrickBy(step) {
+    this.bricks.forEachAlive( (brick)=>{
+      var newY = brick.y + step
+      var t = this.add.tween(brick).to({
+        y: newY
+      }, 500)
+      t.start()
+    })
+  }
+
+  startToShoot(to) {
+    if (this.haveNBalls === this.needNBalls) {
+      var from = this.nextShootingPoint.clone()
+      this.shooter.shoot(from, to)
+      this.nextShootingPoint = null
+
+      this.haveNBalls = 0
+      this.needNBalls = this.shooter.nBalls
+    }
   }
 
   onBallHitBottom(bottomLine, ball) {
     ball.body.velocity.setTo(0, 0)
+    this.haveNBalls += 1
 
     if (!this.nextShootingPoint) {
       var p = ball.position.clone()
@@ -92,6 +114,11 @@ class GameState extends Phaser.State {
         ball.kill()
       })
       tween.start()
+    }
+
+    if (this.haveNBalls === this.needNBalls) {
+      this.addBricks(12)
+      this.moveBrickBy(70)
     }
 
   };
