@@ -57,11 +57,13 @@ class GameState extends Phaser.State {
     })
   }
 
-  addBricks(hp) {
+  addBricks() {
+    var hp = this.rnd.between(5, 10)
     var gridSize = 70
-    var colMax = 7;
+    var colMax = this.rnd.between(4, 7); //7
     var xOffset = 5
     var row = 0
+
     for (let i = 0; i < colMax; i++) {
       let brick = this.bricks.getFirstDead()
       brick.reset(xOffset + i * gridSize,
@@ -117,19 +119,19 @@ class GameState extends Phaser.State {
     if (this.haveNBalls === this.needNBalls) {
       var isGameOver = false
       this.bricks.forEachAlive((brick)=> {
-        if (brick.y>=504){
-          isGameOver =true
+        if (brick.y >= 504) {
+          isGameOver = true
         }
       })
       this.addBricks(12)
       this.moveBrickBy(70)
-      isGameOver?this.restartGame():''
+      isGameOver ? this.restartGame() : ''
     }
 
   };
 
-  restartGame(){
-    this.state.restart(true,false)
+  restartGame() {
+    this.state.restart(true, false)
   }
 
   update() {
