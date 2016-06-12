@@ -1,10 +1,10 @@
-Phaser game develop boilerplate
--------------------------------
+bbtan by phaser framework
+-------------------------
 
-## how to use
+## how to play
 
 1. git clone the project
-2. npm in 
+2. npm in
 3. node devServer.js
 4. open browser <http://127.0.0.1:4000>
 5. write your game , auto fresh in browser
@@ -13,8 +13,6 @@ Phaser game develop boilerplate
 
 ### screen shot
 
-![screen](https://raw.githubusercontent.com/stormslowly/phaser-webpack-es6-boilerplate/master/screen.png)
-
-the rainbow test is borrowed from <https://github.com/belohlavek/phaser-es6-boilerplate>. it's also a nice phaser boilerplate
+![screen](https://raw.githubusercontent.com/phaser-can-do-this/bbtan-phaser/master/screen.png)
 
 -have fun-
