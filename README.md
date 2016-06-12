@@ -7,8 +7,8 @@ bbtan by phaser framework
 2. npm in
 3. node devServer.js
 4. open browser <http://127.0.0.1:4000>
-5. write your game , auto fresh in browser
-6. use gulp to build your game (in `build` folder )
+5. click screen to shoot the ball to that direction
+
 
 
 ### screen shot
